@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Examples - Prompt Enhancer</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Core Libraries -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/typed.js/2.0.12/typed.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/splitting@1.0.6/dist/splitting.css">
+    <script src="https://unpkg.com/splitting@1.0.6/dist/splitting.min.js"></script>
+    
+    <!-- Prism.js for syntax highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+    
+    <style>
+        :root {
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #0f0f0f;
+            --bg-accent: #2a2a2a;
+            --accent-primary: #d4a237;
+            --accent-secondary: #4a9b8e;
+            --text-primary: #e0e0e0;
+            --text-secondary: #a0a0a0;
+            --text-muted: #6a6a6a;
+            --border-color: #333333;
+        }
+        
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: var(--border-color) var(--bg-primary);
+        }
+        
+        *::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        *::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+        }
+        
+        *::-webkit-scrollbar-thumb {
+            background-color: var(--border-color);
+            border-radius: 3px;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+            background-image: url('resources/workspace-bg.jpg');
+            background-size: cover;
+            background-attachment: fixed;
+            font-family: 'Inter', sans-serif;
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+        
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        .glass-effect {
+            background: rgba(26, 26, 26, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .panel {
+            background: rgba(26, 26, 26, 0.9);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .panel:hover {
+            border-color: rgba(212, 162, 55, 0.3);
+        }
+        
+        .example-card {
+            background: rgba(26, 26, 26, 0.9);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .example-card:hover {
+            border-color: var(--accent-primary);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(212, 162, 55, 0.2);
+        }
+        
+        .example-card.expanded {
+            border-color: var(--accent-secondary);
+            box-shadow: 0 8px 25px rgba(74, 155, 142, 0.3);
+        }
+        
+        .before-after {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        
+        .before-section {
+            background: rgba(212, 162, 55, 0.1);
+            border: 1px solid rgba(212, 162, 55, 0.3);
+        }
+        
+        .after-section {
+            background: rgba(74, 155, 142, 0.1);
+            border: 1px solid rgba(74, 155, 142, 0.3);
+        }
+        
+        .code-block {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 1rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            overflow-x: auto;
+        }
+        
+        .keyboard-hint {
+            background: var(--bg-accent);
+            color: var(--text-secondary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            padding: 2px 6px;
+            border-radius: 3px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .filter-btn {
+            background: var(--bg-accent);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+            transition: all 0.2s ease;
+        }
+        
+        .filter-btn.active {
+            background: var(--accent-primary);
+            color: var(--bg-primary);
+            border-color: var(--accent-primary);
+        }
+        
+        .filter-btn:hover {
+            border-color: var(--accent-primary);
+            color: var(--text-primary);
+        }
+        
+        .hero-section {
+            background-image: url('resources/enhancement-demo.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+        
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+        
+        .stat-card {
+            background: rgba(26, 26, 26, 0.9);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--accent-primary);
+        }
+        
+        .comparison-container {
+            position: relative;
+            overflow: hidden;
+            border-radius: 8px;
+        }
+        
+        .comparison-slider {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 4px;
+            height: 100%;
+            background: var(--accent-primary);
+            cursor: ew-resize;
+            z-index: 10;
+        }
+        
+        .comparison-slider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 20px;
+            height: 20px;
+            background: var(--accent-primary);
+            border-radius: 50%;
+        }
+        
+        .comparison-before,
+        .comparison-after {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+        
+        .comparison-after {
+            clip-path: inset(0 50% 0 0);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 z-50 glass-effect">
+        <div class="max-w-7xl mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-8 h-8 bg-gradient-to-br from-amber-400 to-amber-600 rounded-lg flex items-center justify-center">
+                        <span class="text-black font-bold text-sm">PE</span>
+                    </div>
+                    <h1 class="text-xl font-semibold">Prompt Enhancer</h1>
+                </div>
+                <div class="flex items-center space-x-6">
+                    <a href="index.html" class="text-gray-400 hover:text-white transition-colors">Enhancer</a>
+                    <a href="examples.html" class="text-amber-400 font-medium">Examples</a>
+                    <a href="settings.html" class="text-gray-400 hover:text-white transition-colors">Settings</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section pt-24 pb-16">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center">
+                <h2 class="text-4xl font-bold mb-4 fade-in" data-splitting>
+                    Enhancement Examples & Best Practices
+                </h2>
+                <p class="text-xl text-gray-300 mb-8 fade-in">
+                    See how simple prompts transform into comprehensive, context-aware instructions
+                </p>
+                <div class="flex items-center justify-center space-x-4 fade-in">
+                    <div class="keyboard-hint">Try</div>
+                    <span class="text-gray-400">the examples in the main enhancer</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Statistics -->
+    <section class="max-w-7xl mx-auto px-6 py-12">
+        <div class="stats-grid">
+            <div class="stat-card fade-in">
+                <div class="stat-number">15+</div>
+                <div class="text-gray-400">Example Enhancements</div>
+            </div>
+            <div class="stat-card fade-in">
+                <div class="stat-number">6</div>
+                <div class="text-gray-400">Project Types</div>
+            </div>
+            <div class="stat-card fade-in">
+                <div class="stat-number">95%</div>
+                <div class="text-gray-400">Quality Improvement</div>
+            </div>
+            <div class="stat-card fade-in">
+                <div class="stat-number">3x</div>
+                <div class="text-gray-400">Faster Development</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Filter Controls -->
+    <section class="max-w-7xl mx-auto px-6 py-8">
+        <div class="flex items-center justify-between mb-8">
+            <h3 class="text-2xl font-bold">Enhancement Examples</h3>
+            <div class="flex items-center space-x-2">
+                <button class="filter-btn active px-4 py-2 rounded-lg text-sm font-medium" data-filter="all">
+                    All Examples
+                </button>
+                <button class="filter-btn px-4 py-2 rounded-lg text-sm font-medium" data-filter="react">
+                    React
+                </button>
+                <button class="filter-btn px-4 py-2 rounded-lg text-sm font-medium" data-filter="nodejs">
+                    Node.js
+                </button>
+                <button class="filter-btn px-4 py-2 rounded-lg text-sm font-medium" data-filter="python">
+                    Python
+                </button>
+                <button class="filter-btn px-4 py-2 rounded-lg text-sm font-medium" data-filter="general">
+                    General
+                </button>
+            </div>
+        </div>
+
+        <!-- Examples Grid -->
+        <div id="examplesGrid" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Examples will be populated by JavaScript -->
+        </div>
+    </section>
+
+    <!-- Usage Guidelines -->
+    <section class="max-w-7xl mx-auto px-6 py-16">
+        <div class="panel p-8">
+            <h3 class="text-2xl font-bold mb-8">Usage Guidelines & Best Practices</h3>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div>
+                    <h4 class="text-lg font-semibold mb-4 text-amber-400">✓ Do</h4>
+                    <ul class="space-y-3 text-gray-300">
+                        <li class="flex items-start">
+                            <span class="text-green-400 mr-2">•</span>
+                            <span>Start with clear intent - even simple prompts like "add tests" work well</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-green-400 mr-2">•</span>
+                            <span>Be specific about scope - mention specific files or components when relevant</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-green-400 mr-2">•</span>
+                            <span>Use domain language - technical terms help the enhancer understand context</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-green-400 mr-2">•</span>
+                            <span>Review enhanced prompts - edit further if needed</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-green-400 mr-2">•</span>
+                            <span>Iterate if needed - enhance the same prompt multiple times for different approaches</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold mb-4 text-red-400">✗ Don't</h4>
+                    <ul class="space-y-3 text-gray-300">
+                        <li class="flex items-start">
+                            <span class="text-red-400 mr-2">•</span>
+                            <span>Write overly vague prompts like "fix stuff" or "make it better"</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-red-400 mr-2">•</span>
+                            <span>Ignore context settings - they significantly improve enhancement quality</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-red-400 mr-2">•</span>
+                            <span>Expect perfect results every time - review and refine as needed</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-red-400 mr-2">•</span>
+                            <span>Use for sensitive or confidential information</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-red-400 mr-2">•</span>
+                            <span>Forget to test enhanced prompts in your actual workflow</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Keyboard Shortcuts Reference -->
+    <section class="max-w-7xl mx-auto px-6 py-16">
+        <div class="panel p-8">
+            <h3 class="text-2xl font-bold mb-8">Keyboard Shortcuts Reference</h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="bg-gray-800 rounded-lg p-4">
+                    <h4 class="font-semibold mb-3 text-amber-400">Primary Actions</h4>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex items-center justify-between">
+                            <span>Enhance Prompt</span>
+                            <span class="keyboard-hint">Ctrl+P</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span>Cancel Enhancement</span>
+                            <span class="keyboard-hint">Esc</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span>Undo</span>
+                            <span class="keyboard-hint">Ctrl+Z</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span>Submit</span>
+                            <span class="keyboard-hint">Ctrl+Enter</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-800 rounded-lg p-4">
+                    <h4 class="font-semibold mb-3 text-teal-400">Navigation</h4>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex items-center justify-between">
+                            <span>Toggle History</span>
+                            <span class="keyboard-hint">Ctrl+H</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span>Preferences</span>
+                            <span class="keyboard-hint">Ctrl+,</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span>Duplicate Prompt</span>
+                            <span class="keyboard-hint">Ctrl+D</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span>Clear Input</span>
+                            <span class="keyboard-hint">Ctrl+Shift+Del</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-800 rounded-lg p-4">
+                    <h4 class="font-semibold mb-3 text-purple-400">Context</h4>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex items-center justify-between">
+                            <span>Quick Mode</span>
+                            <span class="keyboard-hint">Ctrl+1</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span>Smart Mode</span>
+                            <span class="keyboard-hint">Ctrl+2</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span>Comprehensive</span>
+                            <span class="keyboard-hint">Ctrl+3</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span>Copy Enhanced</span>
+                            <span class="keyboard-hint">Ctrl+Shift+C</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Troubleshooting -->
+    <section class="max-w-7xl mx-auto px-6 py-16">
+        <div class="panel p-8">
+            <h3 class="text-2xl font-bold mb-8">Troubleshooting Common Issues</h3>
+            
+            <div class="space-y-6">
+                <div class="border-l-4 border-amber-400 pl-6">
+                    <h4 class="font-semibold mb-2">Ctrl+P doesn't work</h4>
+                    <p class="text-gray-400 mb-2">Ensure you have text in the input box and you're in Normal mode (not in a menu or other mode).</p>
+                    <p class="text-gray-400">Check that you're using the correct key combination for your terminal/browser.</p>
+                </div>
+                
+                <div class="border-l-4 border-teal-400 pl-6">
+                    <h4 class="font-semibold mb-2">Enhancement takes too long</h4>
+                    <p class="text-gray-400 mb-2">Press Esc to cancel and try again with a shorter or simpler prompt.</p>
+                    <p class="text-gray-400">Check your network connection if using external services.</p>
+                </div>
+                
+                <div class="border-l-4 border-red-400 pl-6">
+                    <h4 class="font-semibold mb-2">Enhanced prompt isn't helpful</h4>
+                    <p class="text-gray-400 mb-2">Edit the enhanced prompt manually - it provides a starting point, not a final answer.</p>
+                    <p class="text-gray-400">Try starting with a more specific initial prompt or adjust your context settings.</p>
+                </div>
+                
+                <div class="border-l-4 border-purple-400 pl-6">
+                    <h4 class="font-semibold mb-2">Context not detected correctly</h4>
+                    <p class="text-gray-400 mb-2">Manually select your project type and framework from the context panel.</p>
+                    <p class="text-gray-400">Add team conventions for more accurate context-aware enhancements.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="border-t border-gray-700 mt-16">
+        <div class="max-w-7xl mx-auto px-6 py-8">
+            <div class="text-center text-gray-400">
+                <p>&copy; 2024 Prompt Enhancer. Crafted for developers who value precision.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Examples data
+        const examples = [
+            {
+                id: 1,
+                category: 'react',
+                title: 'React Component Bug Fix',
+                before: 'fix the login bug',
+                after: `fix the login bug
+
+Context: This is a react project using nextjs.
+
+Please:
+1. Review the current login implementation in src/auth/login.ts
+2. Check for issues with token validation and session management
+3. Examine error handling in the authentication middleware
+4. Look at recent changes to the user authentication flow
+5. Test the fix with both valid and invalid credentials
+6. Ensure the fix follows our existing error handling patterns
+
+Considerations:
+• Maintain component reusability and separation of concerns
+• Follow React hooks best practices and rules
+• Consider performance implications and optimization opportunities
+• Leverage nextjs specific features and conventions`,
+                tags: ['bug', 'authentication', 'react']
+            },
+            {
+                id: 2,
+                category: 'nodejs',
+                title: 'API Endpoint Implementation',
+                before: 'add user profile endpoint',
+                after: `add user profile endpoint
+
+Context: This is a nodejs project using express.
+
+Please:
+1. Analyze the existing API structure and routing patterns
+2. Design the user profile endpoint following RESTful principles
+3. Implement GET /api/users/:id/profile endpoint
+4. Add proper input validation and error handling
+5. Include authentication and authorization checks
+6. Write comprehensive tests for the endpoint
+7. Update API documentation
+
+Considerations:
+• Ensure proper error handling and async/await patterns
+• Follow RESTful API design principles
+• Consider security implications and input validation
+• Leverage express specific features and conventions`,
+                tags: ['api', 'backend', 'user-management']
+            },
+            {
+                id: 3,
+                category: 'python',
+                title: 'Data Processing Function',
+                before: 'create function to process csv data',
+                after: `create function to process csv data
+
+Context: This is a python project.
+
+Please:
+1. Analyze the CSV data structure and requirements
+2. Design a function that handles various CSV formats and edge cases
+3. Implement proper error handling for malformed data
+4. Add data validation and cleaning steps
+5. Include logging for debugging and monitoring
+6. Write unit tests covering different scenarios
+7. Add type hints for better code clarity
+
+Considerations:
+• Follow PEP 8 style guidelines and Python best practices
+• Consider type hints for better code clarity
+• Ensure proper exception handling and logging
+• Use pandas or csv module appropriately`,
+                tags: ['data-processing', 'function', 'csv']
+            },
+            {
+                id: 4,
+                category: 'general',
+                title: 'Code Review Guidelines',
+                before: 'create code review checklist',
+                after: `create code review checklist
+
+Context: This is a general purpose project.
+
+Please:
+1. Review the existing codebase structure and standards
+2. Create a comprehensive code review checklist
+3. Include sections for functionality, performance, and security
+4. Add specific checks for the project's tech stack
+5. Include guidelines for constructive feedback
+6. Provide examples of good and bad review comments
+7. Update team documentation with the checklist
+
+Considerations:
+• Maintain code quality and readability
+• Follow established patterns and conventions
+• Consider maintainability and future extensibility
+• Ensure the checklist is practical and actionable`,
+                tags: ['documentation', 'process', 'code-quality']
+            },
+            {
+                id: 5,
+                category: 'react',
+                title: 'Component Testing Suite',
+                before: 'add tests for user profile component',
+                after: `add tests for user profile component
+
+Context: This is a react project using nextjs.
+
+Please:
+1. Analyze the UserProfile component structure and props
+2. Design comprehensive test cases covering all functionality
+3. Implement unit tests using React Testing Library
+4. Add integration tests for user interactions
+5. Test edge cases and error scenarios
+6. Ensure tests are isolated and repeatable
+7. Achieve good test coverage (aim for 80%+)
+
+Considerations:
+• Maintain component reusability and separation of concerns
+• Follow React hooks best practices and rules
+• Consider performance implications and optimization opportunities
+• Leverage nextjs specific features and conventions`,
+                tags: ['testing', 'react', 'component']
+            },
+            {
+                id: 6,
+                category: 'nodejs',
+                title: 'Database Migration',
+                before: 'create migration for user preferences',
+                after: `create migration for user preferences
+
+Context: This is a nodejs project using express.
+
+Please:
+1. Review the current database schema and user table structure
+2. Design the user preferences table with appropriate data types
+3. Create a migration file following the project's migration patterns
+4. Add indexes for commonly queried fields
+5. Include rollback functionality
+6. Write tests to verify the migration works correctly
+7. Update seed data if necessary
+
+Considerations:
+• Ensure proper error handling and async/await patterns
+• Follow the project's database conventions
+• Consider performance implications of the schema changes
+• Leverage the ORM's specific features and conventions`,
+                tags: ['database', 'migration', 'schema']
+            },
+            {
+                id: 7,
+                category: 'python',
+                title: 'API Client Implementation',
+                before: 'build api client for external service',
+                after: `build api client for external service
+
+Context: This is a python project.
+
+Please:
+1. Research the external API documentation and endpoints
+2. Design a clean, Pythonic API client interface
+3. Implement authentication and request handling
+4. Add proper error handling and retry logic
+5. Include response validation and parsing
+6. Write comprehensive tests with mock responses
+7. Add usage examples and documentation
+
+Considerations:
+• Follow PEP 8 style guidelines and Python best practices
+• Consider type hints for better code clarity
+• Ensure proper exception handling and logging
+• Use requests or aiohttp appropriately`,
+                tags: ['api', 'client', 'integration']
+            },
+            {
+                id: 8,
+                category: 'general',
+                title: 'Performance Optimization',
+                before: 'optimize slow page load',
+                after: `optimize slow page load
+
+Context: This is a general purpose project.
+
+Please:
+1. Analyze the current page load performance using profiling tools
+2. Identify bottlenecks in rendering, JavaScript execution, and network requests
+3. Implement lazy loading for images and non-critical resources
+4. Optimize asset delivery with compression and caching
+5. Review and optimize database queries if applicable
+6. Implement code splitting for JavaScript bundles
+7. Test performance improvements across different devices
+
+Considerations:
+• Maintain code quality and readability
+• Follow established patterns and conventions
+• Consider maintainability and future extensibility
+• Balance performance gains with development complexity`,
+                tags: ['performance', 'optimization', 'frontend']
+            },
+            {
+                id: 9,
+                category: 'react',
+                title: 'Custom Hook Implementation',
+                before: 'create useForm hook',
+                after: `create useForm hook
+
+Context: This is a react project using nextjs.
+
+Please:
+1. Analyze form handling requirements across the application
+2. Design a reusable useForm hook with validation support
+3. Implement state management for form values and errors
+4. Add validation rules and custom validators
+5. Handle form submission and loading states
+6. Write comprehensive tests for the hook
+7. Create usage examples and documentation
+
+Considerations:
+• Maintain component reusability and separation of concerns
+• Follow React hooks best practices and rules
+• Consider performance implications and optimization opportunities
+• Leverage nextjs specific features and conventions`,
+                tags: ['hook', 'form', 'react']
+            },
+            {
+                id: 10,
+                category: 'nodejs',
+                title: 'Authentication Middleware',
+                before: 'add jwt authentication',
+                after: `add jwt authentication
+
+Context: This is a nodejs project using express.
+
+Please:
+1. Review the current authentication system and requirements
+2. Implement JWT token generation and validation
+3. Create authentication middleware for route protection
+4. Add token refresh mechanism
+5. Implement proper error handling for authentication failures
+6. Write tests for all authentication scenarios
+7. Update API documentation with authentication requirements
+
+Considerations:
+• Ensure proper error handling and async/await patterns
+• Follow security best practices for JWT implementation
+• Consider token expiration and refresh strategies
+• Leverage express specific features and conventions`,
+                tags: ['authentication', 'jwt', 'security']
+            },
+            {
+                id: 11,
+                category: 'python',
+                title: 'Background Task Processing',
+                before: 'implement background job queue',
+                after: `implement background job queue
+
+Context: This is a python project.
+
+Please:
+1. Analyze the requirements for background task processing
+2. Choose an appropriate task queue system (Celery, RQ, etc.)
+3. Set up the task queue with proper configuration
+4. Implement task definitions and worker processes
+5. Add error handling and retry mechanisms
+6. Implement monitoring and logging for tasks
+7. Write tests for task execution and failure scenarios
+
+Considerations:
+• Follow PEP 8 style guidelines and Python best practices
+• Consider type hints for better code clarity
+• Ensure proper exception handling and logging
+• Choose the appropriate broker (Redis, RabbitMQ, etc.)`,
+                tags: ['background', 'queue', 'async']
+            },
+            {
+                id: 12,
+                category: 'general',
+                title: 'CI/CD Pipeline Setup',
+                before: 'setup github actions workflow',
+                after: `setup github actions workflow
+
+Context: This is a general purpose project.
+
+Please:
+1. Analyze the project structure and testing requirements
+2. Design a CI/CD pipeline with appropriate stages
+3. Set up automated testing for different environments
+4. Implement code quality checks and security scanning
+5. Add automated deployment to staging/production
+6. Configure notifications for build status
+7. Document the pipeline and troubleshooting steps
+
+Considerations:
+• Maintain code quality and readability
+• Follow established patterns and conventions
+• Consider maintainability and future extensibility
+• Ensure the pipeline is efficient and reliable`,
+                tags: ['ci/cd', 'automation', 'deployment']
+            },
+            {
+                id: 13,
+                category: 'react',
+                title: 'State Management Setup',
+                before: 'setup redux toolkit',
+                after: `setup redux toolkit
+
+Context: This is a react project using nextjs.
+
+Please:
+1. Analyze the application state requirements and complexity
+2. Set up Redux Toolkit with proper store configuration
+3. Create slices for different state domains
+4. Implement actions and reducers following best practices
+5. Set up middleware for async operations
+6. Connect components to the Redux store
+7. Write tests for reducers and actions
+
+Considerations:
+• Maintain component reusability and separation of concerns
+• Follow React hooks best practices and rules
+• Consider performance implications and optimization opportunities
+• Leverage nextjs specific features and conventions`,
+                tags: ['redux', 'state', 'management']
+            },
+            {
+                id: 14,
+                category: 'nodejs',
+                title: 'Error Handling System',
+                before: 'improve error handling',
+                after: `improve error handling
+
+Context: This is a nodejs project using express.
+
+Please:
+1. Review the current error handling implementation
+2. Design a comprehensive error handling strategy
+3. Create custom error classes for different scenarios
+4. Implement global error handling middleware
+5. Add proper logging and error tracking
+6. Create user-friendly error responses
+7. Write tests for error scenarios
+
+Considerations:
+• Ensure proper error handling and async/await patterns
+• Follow RESTful API error response conventions
+• Consider security implications of error messages
+• Leverage express specific features and conventions`,
+                tags: ['error-handling', 'middleware', 'logging']
+            },
+            {
+                id: 15,
+                category: 'python',
+                title: 'Data Validation System',
+                before: 'add input validation',
+                after: `add input validation
+
+Context: This is a python project.
+
+Please:
+1. Analyze the input data requirements and validation rules
+2. Choose an appropriate validation library (pydantic, marshmallow, etc.)
+3. Implement validation schemas for different data types
+4. Add custom validators for business-specific rules
+5. Integrate validation into the request handling flow
+6. Create comprehensive error messages for validation failures
+7. Write tests for all validation scenarios
+
+Considerations:
+• Follow PEP 8 style guidelines and Python best practices
+• Consider type hints for better code clarity
+• Ensure proper exception handling and logging
+• Choose the appropriate validation library for the use case`,
+                tags: ['validation', 'input', 'data']
+            }
+        ];
+
+        // Initialize the examples page
+        class ExamplesPage {
+            constructor() {
+                this.currentFilter = 'all';
+                this.init();
+            }
+            
+            init() {
+                this.setupEventListeners();
+                this.renderExamples();
+                this.initAnimations();
+            }
+            
+            setupEventListeners() {
+                // Filter buttons
+                document.querySelectorAll('.filter-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                        e.target.classList.add('active');
+                        this.currentFilter = e.target.dataset.filter;
+                        this.renderExamples();
+                    });
+                });
+            }
+            
+            renderExamples() {
+                const grid = document.getElementById('examplesGrid');
+                const filteredExamples = this.currentFilter === 'all' 
+                    ? examples 
+                    : examples.filter(ex => ex.category === this.currentFilter);
+                
+                grid.innerHTML = filteredExamples.map(example => this.createExampleCard(example)).join('');
+                
+                // Add click handlers for expansion
+                grid.querySelectorAll('.example-card').forEach(card => {
+                    card.addEventListener('click', () => this.toggleExample(card));
+                });
+            }
+            
+            createExampleCard(example) {
+                return `
+                    <div class="example-card p-6" data-example-id="${example.id}">
+                        <div class="flex items-start justify-between mb-4">
+                            <h4 class="text-lg font-semibold">${example.title}</h4>
+                            <div class="flex items-center space-x-2">
+                                ${example.tags.map(tag => `<span class="text-xs bg-gray-700 px-2 py-1 rounded">${tag}</span>`).join('')}
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <h5 class="text-sm font-medium text-amber-400 mb-2">Before:</h5>
+                            <div class="code-block text-sm">
+                                ${example.before}
+                            </div>
+                        </div>
+                        
+                        <div class="text-center text-gray-500 mb-4">
+                            <div class="text-2xl">↓</div>
+                            <div class="text-sm">Click to see enhancement</div>
+                        </div>
+                        
+                        <div class="hidden enhanced-content">
+                            <h5 class="text-sm font-medium text-teal-400 mb-2">After Enhancement:</h5>
+                            <div class="code-block text-sm whitespace-pre-wrap">
+                                ${example.after}
+                            </div>
+                            
+                            <div class="mt-4 flex items-center justify-between">
+                                <button class="text-sm text-amber-400 hover:text-amber-300" onclick="examplesPage.copyToEnhancer('${example.before}')">
+                                    Try in Enhancer
+                                </button>
+                                <button class="text-sm text-gray-400 hover:text-gray-300" onclick="examplesPage.copyToClipboard('${example.after.replace(/'/g, "\\'")}')">
+                                    Copy Enhanced
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            toggleExample(card) {
+                const enhancedContent = card.querySelector('.enhanced-content');
+                const isExpanded = card.classList.contains('expanded');
+                
+                if (isExpanded) {
+                    card.classList.remove('expanded');
+                    enhancedContent.classList.add('hidden');
+                } else {
+                    card.classList.add('expanded');
+                    enhancedContent.classList.remove('hidden');
+                    
+                    // Animate the expansion
+                    anime({
+                        targets: enhancedContent,
+                        opacity: [0, 1],
+                        translateY: [20, 0],
+                        duration: 300,
+                        easing: 'easeOutQuart'
+                    });
+                }
+            }
+            
+            copyToEnhancer(prompt) {
+                // Store in localStorage for the main enhancer to pick up
+                localStorage.setItem('examplePrompt', prompt);
+                window.location.href = 'index.html';
+            }
+            
+            copyToClipboard(text) {
+                navigator.clipboard.writeText(text).then(() => {
+                    this.showNotification('Copied to clipboard');
+                }).catch(() => {
+                    this.showNotification('Failed to copy', 'error');
+                });
+            }
+            
+            showNotification(message, type = 'info') {
+                // Simple notification implementation
+                const notification = document.createElement('div');
+                notification.className = `fixed top-20 right-6 px-4 py-3 rounded-lg shadow-lg z-50 transform translate-x-full transition-transform duration-300 ${
+                    type === 'error' ? 'bg-red-900 border border-red-700' : 'bg-gray-900 border border-amber-600'
+                }`;
+                notification.textContent = message;
+                
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    notification.classList.remove('translate-x-full');
+                }, 100);
+                
+                setTimeout(() => {
+                    notification.classList.add('translate-x-full');
+                    setTimeout(() => notification.remove(), 300);
+                }, 3000);
+            }
+            
+            initAnimations() {
+                // Initialize text splitting for animations
+                if (typeof Splitting !== 'undefined') {
+                    Splitting();
+                }
+                
+                // Animate elements on load
+                const fadeElements = document.querySelectorAll('.fade-in');
+                fadeElements.forEach((element, index) => {
+                    anime({
+                        targets: element,
+                        opacity: [0, 1],
+                        translateY: [20, 0],
+                        delay: index * 100,
+                        duration: 800,
+                        easing: 'easeOutQuart'
+                    });
+                });
+            }
+        }
+
+        // Initialize the examples page
+        let examplesPage;
+        document.addEventListener('DOMContentLoaded', () => {
+            examplesPage = new ExamplesPage();
+        });
+
+        // Global functions for inline event handlers
+        window.examplesPage = {
+            copyToEnhancer: (prompt) => examplesPage.copyToEnhancer(prompt),
+            copyToClipboard: (text) => examplesPage.copyToClipboard(text)
+        };
+    </script>
+</body>
+</html>
