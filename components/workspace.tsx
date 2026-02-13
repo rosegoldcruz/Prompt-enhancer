@@ -1,15 +1,14 @@
 "use client";
 
+import Image from "next/image";
 import { useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Copy, Sparkles } from "lucide-react";
+import { Copy } from "lucide-react";
 import { AceternityGlowCard } from "@/components/ui/aceternity-glow-card";
 import { MagicSegmentedToggle } from "@/components/ui/magic-segmented-toggle";
 import { MagicShimmerButton } from "@/components/ui/magic-shimmer-button";
 
 type EnhancementLevel = "quick" | "smart" | "comprehensive";
-type ProjectType = "general" | "react" | "nodejs" | "python" | "mobile" | "web" | "ai";
-type Framework = "none" | "nextjs" | "vite" | "express" | "django" | "fastapi" | "react-native";
 
 const LEVEL_OPTIONS: Array<{ label: string; value: EnhancementLevel }> = [
   { label: "Quick", value: "quick" },
@@ -17,33 +16,10 @@ const LEVEL_OPTIONS: Array<{ label: string; value: EnhancementLevel }> = [
   { label: "Comprehensive", value: "comprehensive" }
 ];
 
-const PROJECT_OPTIONS: Array<{ label: string; value: ProjectType }> = [
-  { label: "General", value: "general" },
-  { label: "React", value: "react" },
-  { label: "Node", value: "nodejs" },
-  { label: "Python", value: "python" },
-  { label: "Mobile", value: "mobile" },
-  { label: "Web", value: "web" },
-  { label: "AI", value: "ai" }
-];
-
-const FRAMEWORK_OPTIONS: Array<{ label: string; value: Framework }> = [
-  { label: "None", value: "none" },
-  { label: "Next.js", value: "nextjs" },
-  { label: "Vite", value: "vite" },
-  { label: "Express", value: "express" },
-  { label: "Django", value: "django" },
-  { label: "FastAPI", value: "fastapi" },
-  { label: "React Native", value: "react-native" }
-];
-
 export function Workspace() {
   const [prompt, setPrompt] = useState("");
   const [enhancedPrompt, setEnhancedPrompt] = useState("");
-  const [projectType, setProjectType] = useState<ProjectType>("react");
-  const [framework, setFramework] = useState<Framework>("nextjs");
   const [enhancementLevel, setEnhancementLevel] = useState<EnhancementLevel>("smart");
-  const [teamConventions, setTeamConventions] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -61,12 +37,7 @@ export function Workspace() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           prompt,
-          enhancementLevel,
-          context: {
-            projectType,
-            framework,
-            teamConventions
-          }
+          enhancementLevel
         })
       });
 
@@ -101,12 +72,17 @@ export function Workspace() {
     <div className="space-y-4 sm:space-y-6">
       <AceternityGlowCard>
         <div className="mb-5 flex items-center gap-3">
-          <div className="rounded-lg border border-gold/40 bg-gold/10 p-2 text-gold">
-            <Sparkles className="h-4 w-4" />
-          </div>
+          <Image
+            src="/favicon_robofox/android-chrome-192x192.png"
+            alt="Aeon Prompt Enhancer logo"
+            width={40}
+            height={40}
+            className="h-10 w-10 rounded-lg"
+            priority
+          />
           <div>
             <h1 className="text-lg font-semibold text-zinc-100 sm:text-xl">Aeon Prompt Enhancer</h1>
-            <p className="text-sm text-zinc-400">Mobile-first workspace with contextual controls</p>
+            <p className="text-sm text-zinc-400">Easy prompt enhancement workspace</p>
           </div>
         </div>
 
@@ -117,60 +93,6 @@ export function Workspace() {
             onChange={setEnhancementLevel}
             options={LEVEL_OPTIONS}
           />
-
-          <div className="space-y-2">
-            <p className="text-sm font-medium text-zinc-300">Project Context</p>
-            <div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              {PROJECT_OPTIONS.map((option) => {
-                const active = option.value === projectType;
-                return (
-                  <button
-                    key={option.value}
-                    type="button"
-                    onClick={() => setProjectType(option.value)}
-                    className={`min-h-11 whitespace-nowrap rounded-full border px-4 text-sm transition ${
-                      active
-                        ? "border-gold/60 bg-gold/15 text-zinc-100"
-                        : "border-zinc-700 bg-zinc-900 text-zinc-400"
-                    }`}
-                  >
-                    {option.label}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <label htmlFor="framework" className="text-sm font-medium text-zinc-300">
-              Framework
-            </label>
-            <select
-              id="framework"
-              value={framework}
-              onChange={(event) => setFramework(event.target.value as Framework)}
-              className="min-h-12 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 text-sm text-zinc-100 outline-none focus:border-gold/60"
-            >
-              {FRAMEWORK_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="space-y-2">
-            <label htmlFor="teamConventions" className="text-sm font-medium text-zinc-300">
-              Team Conventions
-            </label>
-            <textarea
-              id="teamConventions"
-              value={teamConventions}
-              onChange={(event) => setTeamConventions(event.target.value)}
-              placeholder="Naming rules, testing style, architecture constraints"
-              className="min-h-24 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-sm text-zinc-100 outline-none focus:border-gold/60"
-            />
-          </div>
 
           <div className="space-y-2">
             <label htmlFor="prompt" className="text-sm font-medium text-zinc-300">

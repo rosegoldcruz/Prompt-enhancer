@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     siteName: "Aeon Prompt Enhancer",
     images: [
       {
-        url: "/icon-512.png",
+        url: "/favicon_robofox/android-chrome-512x512.png",
         width: 512,
         height: 512,
         alt: "Aeon Prompt Enhancer"
@@ -36,16 +36,16 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Aeon Prompt Enhancer",
     description: "Luxury dark prompt enhancement workspace",
-    images: ["/icon-512.png"]
+    images: ["/favicon_robofox/android-chrome-512x512.png"]
   },
   icons: {
     icon: [
-      { url: "/favicon.ico" },
-      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
-      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" }
+      { url: "/favicon_robofox/favicon.ico" },
+      { url: "/favicon_robofox/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/favicon_robofox/favicon-16x16.png", sizes: "16x16", type: "image/png" }
     ],
-    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
-    shortcut: ["/favicon.ico"]
+    apple: [{ url: "/favicon_robofox/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+    shortcut: ["/favicon_robofox/favicon.ico"]
   },
   manifest: "/site.webmanifest",
   robots: {
