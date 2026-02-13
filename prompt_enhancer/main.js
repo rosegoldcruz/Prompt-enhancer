@@ -16,7 +16,6 @@ class PromptEnhancer {
         this.setupKeyboardShortcuts();
         this.loadHistory();
         this.initAnimations();
-        this.setupContextDetection();
     }
     
     setupEventListeners() {
@@ -30,7 +29,6 @@ class PromptEnhancer {
         promptInput?.addEventListener('input', (e) => {
             this.currentPrompt = e.target.value;
             this.updateCharCount();
-            this.detectContext();
         });
         
         enhanceBtn?.addEventListener('click', () => this.enhancePrompt());
@@ -38,10 +36,6 @@ class PromptEnhancer {
         copyBtn?.addEventListener('click', () => this.copyEnhanced());
         clearHistoryBtn?.addEventListener('click', () => this.clearHistory());
         
-        // Context selectors
-        document.getElementById('projectType')?.addEventListener('change', () => this.saveContext());
-        document.getElementById('framework')?.addEventListener('change', () => this.saveContext());
-        document.getElementById('teamConventions')?.addEventListener('input', () => this.saveContext());
     }
     
     setupKeyboardShortcuts() {
@@ -115,8 +109,8 @@ class PromptEnhancer {
         this.showEnhancementOverlay();
         
         try {
-            const context = this.getContext();
-            const enhancementLevel = document.querySelector('input[name="enhancementLevel"]:checked')?.value || 'smart';
+            const context = this.getDefaultContext();
+            const enhancementLevel = 'smart';
             this.startProgressAnimation();
 
             const enhancedPrompt = await this.requestDeepSeekEnhancement(originalPrompt, context, enhancementLevel);
@@ -198,6 +192,15 @@ class PromptEnhancer {
         if (progressBar) {
             progressBar.style.width = '100%';
         }
+    }
+
+    getDefaultContext() {
+        return {
+            projectType: 'web',
+            framework: 'none',
+            teamConventions: '',
+            enhancementLevel: 'smart'
+        };
     }
     
     async simulateEnhancement(prompt) {
@@ -846,30 +849,15 @@ class PromptEnhancer {
     }
     
     getContext() {
-        return {
-            projectType: document.getElementById('projectType')?.value || 'general',
-            framework: document.getElementById('framework')?.value || 'none',
-            teamConventions: document.getElementById('teamConventions')?.value || '',
-            enhancementLevel: document.querySelector('input[name="enhancementLevel"]:checked')?.value || 'smart'
-        };
+        return this.getDefaultContext();
     }
     
     saveContext() {
-        const context = this.getContext();
-        localStorage.setItem('enhancerContext', JSON.stringify(context));
+        return;
     }
     
     loadContext() {
-        const saved = localStorage.getItem('enhancerContext');
-        if (saved) {
-            const context = JSON.parse(saved);
-            document.getElementById('projectType').value = context.projectType || 'general';
-            document.getElementById('framework').value = context.framework || 'none';
-            document.getElementById('teamConventions').value = context.teamConventions || '';
-            
-            const levelRadio = document.querySelector(`input[name="enhancementLevel"][value="${context.enhancementLevel || 'smart'}"]`);
-            if (levelRadio) levelRadio.checked = true;
-        }
+        return;
     }
     
     saveHistory() {

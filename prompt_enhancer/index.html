@@ -237,9 +237,7 @@
                 </div>
                 <div class="flex items-center space-x-6">
                     <a href="index.html" class="text-amber-400 font-medium">Enhancer</a>
-                    <a href="examples.html" class="text-gray-400 hover:text-white transition-colors">Examples</a>
                     <a href="settings.html" class="text-gray-400 hover:text-white transition-colors">Settings</a>
-                    <a href="pricing.html" class="text-gray-400 hover:text-white transition-colors">Monetize</a>
                 </div>
             </div>
         </div>
@@ -266,72 +264,8 @@
     <!-- Main Enhancer Interface -->
     <main class="max-w-7xl mx-auto px-6 pb-16">
         <div class="grid grid-cols-12 gap-6">
-            <!-- Context Configuration Panel -->
-            <div class="col-span-12 lg:col-span-3">
-                <div class="panel p-6 h-full">
-                    <h3 class="text-lg font-semibold mb-4 flex items-center">
-                        <span class="status-indicator mr-3"></span>
-                        Workspace Context
-                    </h3>
-                    
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-400 mb-2">Project Type</label>
-                            <select id="projectType" class="context-selector w-full px-3 py-2 rounded-md">
-                                <option value="general">General Purpose</option>
-                                <option value="react">React Application</option>
-                                <option value="nodejs">Node.js Backend</option>
-                                <option value="python">Python Project</option>
-                                <option value="mobile">Mobile App</option>
-                                <option value="web">Web Development</option>
-                                <option value="ai">AI/ML Project</option>
-                            </select>
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-medium text-gray-400 mb-2">Framework</label>
-                            <select id="framework" class="context-selector w-full px-3 py-2 rounded-md">
-                                <option value="none">No Framework</option>
-                                <option value="nextjs">Next.js</option>
-                                <option value="vite">Vite</option>
-                                <option value="express">Express.js</option>
-                                <option value="django">Django</option>
-                                <option value="fastapi">FastAPI</option>
-                                <option value="react-native">React Native</option>
-                            </select>
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-medium text-gray-400 mb-2">Team Conventions</label>
-                            <textarea id="teamConventions" 
-                                class="enhancer-input w-full px-3 py-2 rounded-md text-sm" 
-                                rows="3" 
-                                placeholder="Add team-specific coding conventions, naming patterns, or project-specific context..."></textarea>
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-medium text-gray-400 mb-2">Enhancement Level</label>
-                            <div class="space-y-2">
-                                <label class="flex items-center">
-                                    <input type="radio" name="enhancementLevel" value="quick" class="mr-2">
-                                    <span class="text-sm">Quick</span>
-                                </label>
-                                <label class="flex items-center">
-                                    <input type="radio" name="enhancementLevel" value="smart" checked class="mr-2">
-                                    <span class="text-sm">Smart</span>
-                                </label>
-                                <label class="flex items-center">
-                                    <input type="radio" name="enhancementLevel" value="comprehensive" class="mr-2">
-                                    <span class="text-sm">Comprehensive</span>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <!-- Main Enhancement Area -->
-            <div class="col-span-12 lg:col-span-6">
+            <div class="col-span-12 lg:col-span-8">
                 <div class="panel p-6">
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-lg font-semibold">Prompt Enhancer</h3>
@@ -391,7 +325,7 @@
             </div>
 
             <!-- Enhancement History Panel -->
-            <div class="col-span-12 lg:col-span-3">
+            <div class="col-span-12 lg:col-span-4">
                 <div class="panel p-6 h-full">
                     <h3 class="text-lg font-semibold mb-4">Enhancement History</h3>
                     
@@ -411,7 +345,7 @@
         <!-- Quick Tips -->
         <div class="mt-8 panel p-6">
             <h3 class="text-lg font-semibold mb-4">Quick Tips</h3>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-400">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-400">
                 <div>
                     <h4 class="font-medium text-white mb-2">Keyboard Shortcuts</h4>
                     <ul class="space-y-1">
@@ -426,14 +360,6 @@
                         <li>• Start with clear intent</li>
                         <li>• Mention specific files</li>
                         <li>• Use domain language</li>
-                    </ul>
-                </div>
-                <div>
-                    <h4 class="font-medium text-white mb-2">Context Matters</h4>
-                    <ul class="space-y-1">
-                        <li>• Select project type</li>
-                        <li>• Add team conventions</li>
-                        <li>• Specify framework</li>
                     </ul>
                 </div>
             </div>
