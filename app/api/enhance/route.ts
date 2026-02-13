@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 
 const DEEPSEEK_API_URL = "https://api.deepseek.com/chat/completions";
+const REQUEST_TIMEOUT_MS = 20_000;
+const MAX_PROMPT_LENGTH = 12_000;
+const MAX_CONTEXT_LENGTH = 1_000;
 
 type EnhancementLevel = "quick" | "smart" | "comprehensive";
 
@@ -13,6 +16,13 @@ type EnhanceBody = {
   };
   enhancementLevel?: EnhancementLevel;
 };
+
+const VALID_ENHANCEMENT_LEVELS: Array<EnhancementLevel> = ["quick", "smart", "comprehensive"];
+
+function truncateText(value: unknown, maxLength: number) {
+  if (typeof value !== "string") return "";
+  return value.trim().slice(0, maxLength);
+}
 
 function buildSystemPrompt(
   context: EnhanceBody["context"],
@@ -51,9 +61,31 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Prompt is required" }, { status: 400 });
   }
 
+  const normalizedPrompt = prompt.trim();
+  if (normalizedPrompt.length > MAX_PROMPT_LENGTH) {
+    return NextResponse.json(
+      { error: `Prompt exceeds ${MAX_PROMPT_LENGTH} characters` },
+      { status: 400 }
+    );
+  }
+
+  const normalizedLevel = VALID_ENHANCEMENT_LEVELS.includes(enhancementLevel as EnhancementLevel)
+    ? enhancementLevel
+    : "smart";
+
+  const normalizedContext = {
+    projectType: truncateText(context?.projectType, MAX_CONTEXT_LENGTH),
+    framework: truncateText(context?.framework, MAX_CONTEXT_LENGTH),
+    teamConventions: truncateText(context?.teamConventions, MAX_CONTEXT_LENGTH)
+  };
+
+  const abortController = new AbortController();
+  const timeoutId = setTimeout(() => abortController.abort(), REQUEST_TIMEOUT_MS);
+
   try {
     const deepseekResponse = await fetch(DEEPSEEK_API_URL, {
       method: "POST",
+      signal: abortController.signal,
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${apiKey}`
@@ -64,11 +96,11 @@ export async function POST(req: NextRequest) {
         messages: [
           {
             role: "system",
-            content: buildSystemPrompt(context, enhancementLevel)
+            content: buildSystemPrompt(normalizedContext, normalizedLevel)
           },
           {
             role: "user",
-            content: prompt.trim()
+            content: normalizedPrompt
           }
         ]
       })
@@ -97,9 +129,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ enhancedPrompt }, { status: 200 });
   } catch (error) {
     if ((error as { name?: string })?.name === "AbortError") {
-      return NextResponse.json({ error: "Request cancelled" }, { status: 499 });
+      return NextResponse.json({ error: "Enhancement request timed out" }, { status: 504 });
     }
 
     return NextResponse.json({ error: "Failed to enhance prompt" }, { status: 500 });
+  } finally {
+    clearTimeout(timeoutId);
   }
 }

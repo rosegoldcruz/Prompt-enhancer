@@ -24,7 +24,7 @@ export function MagicSegmentedToggle<T extends string>({
   return (
     <div className="space-y-2">
       <p className="text-sm font-medium text-zinc-300">{label}</p>
-      <div className="grid grid-cols-3 gap-2 rounded-xl bg-surface p-1">
+      <div className="grid grid-cols-1 gap-2 rounded-xl bg-surface p-1 sm:grid-cols-3">
         {options.map((option) => {
           const active = option.value === value;
           return (
@@ -33,7 +33,7 @@ export function MagicSegmentedToggle<T extends string>({
               type="button"
               onClick={() => onChange(option.value)}
               className={cn(
-                "relative min-h-11 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                "relative min-h-11 rounded-lg px-3 py-2 text-center text-sm font-medium transition-colors",
                 active ? "text-zinc-100" : "text-zinc-400"
               )}
             >

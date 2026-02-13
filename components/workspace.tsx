@@ -71,7 +71,7 @@ export function Workspace() {
   return (
     <div className="space-y-4 sm:space-y-6">
       <AceternityGlowCard>
-        <div className="mb-5 flex items-center gap-3">
+        <div className="mb-4 flex items-start gap-3 sm:items-center">
           <Image
             src="/favicon_robofox/android-chrome-192x192.png"
             alt="Aeon Prompt Enhancer logo"
@@ -80,9 +80,8 @@ export function Workspace() {
             className="h-10 w-10 rounded-lg"
             priority
           />
-          <div>
-            <h1 className="text-lg font-semibold text-zinc-100 sm:text-xl">Aeon Prompt Enhancer</h1>
-            <p className="text-sm text-zinc-400">Easy prompt enhancement workspace</p>
+          <div className="min-w-0">
+            <h1 className="text-lg font-semibold leading-tight text-zinc-100 sm:text-xl">Aeon Prompt Enhancer</h1>
           </div>
         </div>
 
@@ -123,12 +122,12 @@ export function Workspace() {
             exit={{ opacity: 0, y: 8 }}
           >
             <AceternityGlowCard>
-              <div className="mb-3 flex items-center justify-between gap-3">
+              <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <h2 className="text-base font-semibold text-zinc-100">Enhanced Prompt</h2>
                 <button
                   type="button"
                   onClick={onCopy}
-                  className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-zinc-700 px-4 text-sm text-zinc-300"
+                  className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-zinc-700 px-4 text-sm text-zinc-300 sm:w-auto"
                 >
                   <Copy className="h-4 w-4" />
                   Copy
