@@ -1,7 +1,3 @@
 {
-  "redirects": [
-    { "source": "/", "destination": "/prompt_enhancer/index.html", "permanent": false },
-    { "source": "/index.html", "destination": "/prompt_enhancer/index.html", "permanent": false },
-    { "source": "/settings.html", "destination": "/prompt_enhancer/settings.html", "permanent": false }
-  ]
+  "framework": "nextjs"
 }
