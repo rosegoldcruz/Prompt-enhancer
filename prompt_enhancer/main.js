@@ -5,6 +5,8 @@ class PromptEnhancer {
         this.settings = JSON.parse(localStorage.getItem('enhancerSettings') || '{}');
         this.currentPrompt = '';
         this.isEnhancing = false;
+        this.currentRequestController = null;
+        this.progressTimer = null;
         
         this.init();
     }
@@ -113,8 +115,11 @@ class PromptEnhancer {
         this.showEnhancementOverlay();
         
         try {
-            // Simulate enhancement process with realistic timing
-            const enhancedPrompt = await this.simulateEnhancement(originalPrompt);
+            const context = this.getContext();
+            const enhancementLevel = document.querySelector('input[name="enhancementLevel"]:checked')?.value || 'smart';
+            this.startProgressAnimation();
+
+            const enhancedPrompt = await this.requestDeepSeekEnhancement(originalPrompt, context, enhancementLevel);
             
             // Display enhanced prompt
             this.displayEnhancedPrompt(enhancedPrompt);
@@ -127,11 +132,71 @@ class PromptEnhancer {
             this.showNotification('Prompt enhanced successfully');
             
         } catch (error) {
+            const message = error?.message || 'Enhancement failed. Please try again.';
             this.setEnhancementStatus('error', 'Enhancement failed');
-            this.showNotification('Enhancement failed. Please try again.', 'error');
+            this.showNotification(message, 'error');
         } finally {
+            this.stopProgressAnimation();
+            this.currentRequestController = null;
             this.isEnhancing = false;
             this.hideEnhancementOverlay();
+        }
+    }
+
+    async requestDeepSeekEnhancement(prompt, context, enhancementLevel) {
+        this.currentRequestController = new AbortController();
+
+        const response = await fetch('/api/enhance', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                prompt,
+                context,
+                enhancementLevel
+            }),
+            signal: this.currentRequestController.signal
+        });
+
+        const payload = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+            throw new Error(payload.error || 'Enhancement request failed');
+        }
+
+        if (!payload.enhancedPrompt) {
+            throw new Error('Empty response from enhancement service');
+        }
+
+        return payload.enhancedPrompt;
+    }
+
+    startProgressAnimation() {
+        const progressBar = document.getElementById('enhancementProgressBar');
+        if (!progressBar) return;
+
+        let progress = 5;
+        progressBar.style.width = `${progress}%`;
+
+        this.progressTimer = setInterval(() => {
+            if (progress < 90) {
+                progress += Math.max(1, (90 - progress) * 0.08);
+                progressBar.style.width = `${Math.min(progress, 90)}%`;
+            }
+        }, 150);
+    }
+
+    stopProgressAnimation() {
+        const progressBar = document.getElementById('enhancementProgressBar');
+
+        if (this.progressTimer) {
+            clearInterval(this.progressTimer);
+            this.progressTimer = null;
+        }
+
+        if (progressBar) {
+            progressBar.style.width = '100%';
         }
     }
     
@@ -607,7 +672,13 @@ class PromptEnhancer {
     }
     
     cancelEnhancement() {
+        if (this.isEnhancing && this.currentRequestController) {
+            this.currentRequestController.abort();
+            this.currentRequestController = null;
+        }
+
         if (this.isEnhancing) {
+            this.stopProgressAnimation();
             this.isEnhancing = false;
             this.hideEnhancementOverlay();
             this.setEnhancementStatus('error', 'Enhancement cancelled');
