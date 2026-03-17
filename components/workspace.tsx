@@ -101,6 +101,8 @@ export function Workspace() {
               id="prompt"
               value={prompt}
               onChange={(event) => setPrompt(event.target.value)}
+              readOnly={false}
+              disabled={false}
               placeholder="Describe what you want to build or fix"
               className="min-h-36 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-sm text-zinc-100 outline-none focus:border-gold/60"
             />
@@ -133,9 +135,11 @@ export function Workspace() {
                   Copy
                 </button>
               </div>
-              <pre className="overflow-x-auto whitespace-pre-wrap rounded-xl border border-zinc-800 bg-zinc-950 p-4 text-sm leading-relaxed text-zinc-100">
-                {enhancedPrompt}
-              </pre>
+              <textarea
+                value={enhancedPrompt}
+                onChange={(event) => setEnhancedPrompt(event.target.value)}
+                className="overflow-x-auto whitespace-pre-wrap rounded-xl border border-zinc-800 bg-zinc-950 p-4 text-sm leading-relaxed text-zinc-100 outline-none w-full"
+              />
             </AceternityGlowCard>
           </motion.div>
         ) : null}

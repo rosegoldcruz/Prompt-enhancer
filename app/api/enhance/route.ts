@@ -28,21 +28,17 @@ function buildSystemPrompt(
   context: EnhanceBody["context"],
   enhancementLevel: EnhancementLevel | undefined
 ) {
-  const projectType = context?.projectType || "general";
-  const framework = context?.framework && context.framework !== "none" ? context.framework : "unspecified";
-  const teamConventions = (context?.teamConventions || "").trim();
   const level = enhancementLevel || "smart";
 
-  return [
-    "You are an expert prompt enhancement assistant.",
-    "Your job is to rewrite a user prompt into a clearer, more actionable prompt while preserving user intent.",
-    "Return only the final enhanced prompt text with no markdown fences and no extra commentary.",
-    `Enhancement level: ${level}.`,
-    `Project type: ${projectType}.`,
-    `Framework: ${framework}.`,
-    teamConventions ? `Team conventions: ${teamConventions}.` : "Team conventions: none provided.",
-    "Focus on structure, specificity, constraints, acceptance criteria, and expected output format when relevant."
-  ].join(" ");
+  if (level === "quick") {
+    return "You are a prompt editor. Take the user's raw input and return one clean, improved version. Fix grammar, cut filler, add specificity where obvious. Do not add length for its own sake. Output only the improved prompt — no explanations, no preamble, no quotes.";
+  }
+
+  if (level === "comprehensive") {
+    return "You are a senior prompt engineer specializing in AI systems and agentic workflows. Transform the user's raw input into a fully engineered prompt with this structure: Role, Context, Objective, Requirements (bulleted), Constraints, Output format. The result must be deployable in a production AI pipeline with zero ambiguity. Output only the final engineered prompt — nothing else.";
+  }
+
+  return "You are a prompt engineer. Rewrite the user's input into a structured, high-performance prompt. Rules: (1) Add a clear role or context frame if missing. (2) Make the goal explicit and measurable. (3) Surface implied constraints and requirements. (4) Specify the desired output format. (5) Eliminate all vagueness. Output only the rewritten prompt — no commentary, no wrapper text, no explanation of changes.";
 }
 
 export async function POST(req: NextRequest) {
