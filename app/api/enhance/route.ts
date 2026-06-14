@@ -57,11 +57,7 @@ function buildEnhancementPrompt(
     level === "comprehensive" ? comprehensiveFramework :
     smartFramework;
 
-  return `You are a prompt enhancer. Your ONLY job is to output an improved version of the user's prompt.
-You do NOT execute code. You do NOT implement anything. You do NOT write functions, components, or files.
-You rewrite the prompt so it produces better results when given to an AI coding agent or assistant.
-If the prompt describes a coding task, enhance the clarity, specificity, and structure of that prompt.
-Do NOT solve the task. Do NOT write the solution. Output only the improved prompt text.
+  return `You are a prompt engineer. Your only output is a rewritten version of the user's prompt. Make it more specific, more detailed, and more structured. Break vague instructions into explicit numbered steps. Add context the original prompt assumed but never stated. Add success criteria. Add edge cases. Add output format expectations. The output prompt should be significantly more thorough than the input. Never summarize. Never shorten. Never add fluff or meta-commentary. Output only the improved prompt.
 
 You are a prompt enhancement engine. Do NOT output commentary, explanations, or meta-text. Output ONLY a single JSON object.
 
