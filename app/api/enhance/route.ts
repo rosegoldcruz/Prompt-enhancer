@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const DEEPSEEK_API_URL = "https://api.deepseek.com/chat/completions";
+const DEEPSEEK_API_URL = "https://api.deepseek.com/v1/chat/completions";
 const REQUEST_TIMEOUT_MS = 20_000;
 const MAX_PROMPT_LENGTH = 12_000;
 const MAX_CONTEXT_LENGTH = 1_000;
@@ -24,21 +24,97 @@ function truncateText(value: unknown, maxLength: number) {
   return value.trim().slice(0, maxLength);
 }
 
-function buildSystemPrompt(
-  context: EnhanceBody["context"],
+function buildEnhancementPrompt(
   enhancementLevel: EnhancementLevel | undefined
 ) {
   const level = enhancementLevel || "smart";
 
-  if (level === "quick") {
-    return "You are a prompt editor. Take the user's raw input and return one clean, improved version. Fix grammar, cut filler, add specificity where obvious. Do not add length for its own sake. Output only the improved prompt — no explanations, no preamble, no quotes.";
+  const quickFramework = `QUICK enhancement rules:
+- Add missing role context only where truly needed
+- Clarify the output format (e.g. "respond with a JSON object", "output as bullet points")
+- Remove filler language and vague wording
+- Keep the result at most 20% longer than the original
+- Do NOT add generic expert personas, "as an AI language model", or unnecessary flattery`;
+
+  const smartFramework = `SMART enhancement rules:
+- Structure the prompt as: Role → Task → Output Format
+- Inject relevant constraints based on the detected task type (e.g. language/stack for CODE, audience for CREATIVE, depth for ANALYSIS)
+- For reasoning or multi-step tasks, append "Think step by step before answering"
+- Add a clear output spec: what does a complete answer look like?
+- Do NOT add generic expert personas or "as an AI language model"`;
+
+  const comprehensiveFramework = `COMPREHENSIVE enhancement rules:
+- Add Chain of Thought scaffolding: "Before answering, break this problem into steps and work through each one"
+- If the task is pattern-based (e.g. generating multiple items of the same kind), include 1-2 concrete examples
+- Add edge case handling instructions relevant to the task type
+- Add validation criteria at the end: "After completing your answer, self-check: does it meet all the constraints above?"
+- Do NOT add generic expert personas or "as an AI language model"`;
+
+  const levelFramework =
+    level === "quick" ? quickFramework :
+    level === "comprehensive" ? comprehensiveFramework :
+    smartFramework;
+
+  return `You are a prompt enhancement engine. Do NOT output commentary, explanations, or meta-text. Output ONLY a single JSON object.
+
+STEP 1 — Classify the user's raw prompt into exactly ONE type:
+- CODE: building, fixing, debugging, implementing code or software
+- ANALYSIS: comparing, evaluating, researching, explaining concepts
+- CREATIVE: writing, designing, branding, storytelling, content creation
+- STRUCTURED_OUTPUT: generating lists, tables, schemas, plans, structured data
+- AMBIGUOUS: unclear goal, missing context, too vague to act on
+
+STEP 2A — If AMBIGUOUS, output EXACTLY this JSON and nothing else:
+{"type":"ambiguous","questions":["question 1","question 2","question 3"]}
+
+Generate 2-3 specific clarifying questions that would resolve the ambiguity. Target:
+- What is the end goal or output format?
+- Who is the audience or system receiving this?
+- What constraints exist (stack, tone, length, role)?
+
+STEP 2B — If the prompt is clear (CODE, ANALYSIS, CREATIVE, or STRUCTURED_OUTPUT), enhance it using the framework below, then output EXACTLY this JSON and nothing else:
+{"type":"enhanced","prompt":"the full enhanced prompt text here"}
+
+${levelFramework}
+
+CRITICAL OUTPUT RULES:
+- Never include "as an AI language model" or similar self-referential disclaimers
+- Never use generic expert personas ("world-class expert", "renowned professional", "seasoned veteran")
+- Do not make the prompt longer just to look enhanced — every addition must add functional precision
+- Output ONLY the JSON object — no markdown fences, no preamble, no "here is your prompt"`;
+}
+
+type EnhancerResponse =
+  | { type: "ambiguous"; questions: string[] }
+  | { type: "enhanced"; prompt: string }
+  | { type: "unparseable" };
+
+function parseEnhancerResponse(raw: string): EnhancerResponse {
+  // Try to extract a JSON object from the response
+  // The model may wrap it in markdown fences or add surrounding text
+  const jsonMatch = raw.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) return { type: "unparseable" };
+
+  try {
+    const obj = JSON.parse(jsonMatch[0]);
+
+    if (obj.type === "ambiguous" && Array.isArray(obj.questions)) {
+      const questions = obj.questions.filter(
+        (q: unknown): q is string => typeof q === "string" && q.trim().length > 0
+      );
+      if (questions.length > 0) {
+        return { type: "ambiguous", questions };
+      }
+    }
+
+    if (obj.type === "enhanced" && typeof obj.prompt === "string" && obj.prompt.trim().length > 0) {
+      return { type: "enhanced", prompt: obj.prompt.trim() };
+    }
+  } catch {
+    // JSON parse failed
   }
 
-  if (level === "comprehensive") {
-    return "You are a senior prompt engineer specializing in AI systems and agentic workflows. Transform the user's raw input into a fully engineered prompt with this structure: Role, Context, Objective, Requirements (bulleted), Constraints, Output format. The result must be deployable in a production AI pipeline with zero ambiguity. Output only the final engineered prompt — nothing else.";
-  }
-
-  return "You are a prompt engineer. Rewrite the user's input into a structured, high-performance prompt. Rules: (1) Add a clear role or context frame if missing. (2) Make the goal explicit and measurable. (3) Surface implied constraints and requirements. (4) Specify the desired output format. (5) Eliminate all vagueness. Output only the rewritten prompt — no commentary, no wrapper text, no explanation of changes.";
+  return { type: "unparseable" };
 }
 
 export async function POST(req: NextRequest) {
@@ -75,6 +151,16 @@ export async function POST(req: NextRequest) {
     teamConventions: truncateText(context?.teamConventions, MAX_CONTEXT_LENGTH)
   };
 
+  // Build user message with optional context injected
+  const contextParts: string[] = [];
+  if (normalizedContext.projectType) contextParts.push(`Project type: ${normalizedContext.projectType}`);
+  if (normalizedContext.framework) contextParts.push(`Framework: ${normalizedContext.framework}`);
+  if (normalizedContext.teamConventions) contextParts.push(`Conventions: ${normalizedContext.teamConventions}`);
+
+  const userMessage = contextParts.length > 0
+    ? `${normalizedPrompt}\n\nAdditional context:\n${contextParts.join("\n")}`
+    : normalizedPrompt;
+
   const abortController = new AbortController();
   const timeoutId = setTimeout(() => abortController.abort(), REQUEST_TIMEOUT_MS);
 
@@ -92,11 +178,11 @@ export async function POST(req: NextRequest) {
         messages: [
           {
             role: "system",
-            content: buildSystemPrompt(normalizedContext, normalizedLevel)
+            content: buildEnhancementPrompt(normalizedLevel)
           },
           {
             role: "user",
-            content: normalizedPrompt
+            content: userMessage
           }
         ]
       })
@@ -114,15 +200,27 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: deepseekMessage }, { status: deepseekResponse.status });
     }
 
-    const enhancedPrompt = (payload as { choices?: Array<{ message?: { content?: string } }> })
+    const rawContent = (payload as { choices?: Array<{ message?: { content?: string } }> })
       ?.choices?.[0]?.message?.content
       ?.trim();
 
-    if (!enhancedPrompt) {
+    if (!rawContent) {
       return NextResponse.json({ error: "DeepSeek returned an empty response" }, { status: 502 });
     }
 
-    return NextResponse.json({ enhancedPrompt }, { status: 200 });
+    // Parse the structured JSON response from the enhancer
+    const parsed = parseEnhancerResponse(rawContent);
+
+    if (parsed.type === "ambiguous") {
+      return NextResponse.json({ clarifyingQuestions: parsed.questions }, { status: 200 });
+    }
+
+    if (parsed.type === "enhanced") {
+      return NextResponse.json({ enhancedPrompt: parsed.prompt }, { status: 200 });
+    }
+
+    // Fallback: treat the raw content as the enhanced prompt
+    return NextResponse.json({ enhancedPrompt: rawContent }, { status: 200 });
   } catch (error) {
     if ((error as { name?: string })?.name === "AbortError") {
       return NextResponse.json({ error: "Enhancement request timed out" }, { status: 504 });
