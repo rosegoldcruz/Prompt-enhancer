@@ -50,12 +50,20 @@ function buildEnhancementPrompt(
 - Add validation criteria at the end: "After completing your answer, self-check: does it meet all the constraints above?"
 - Do NOT add generic expert personas or "as an AI language model"`;
 
+  const codeGuardrail = `When the task type is CODE: enhance the clarity, specificity, and structure of the prompt. Do NOT write any code. Do NOT implement the solution. Output only the improved prompt.`;
+
   const levelFramework =
     level === "quick" ? quickFramework :
     level === "comprehensive" ? comprehensiveFramework :
     smartFramework;
 
-  return `You are a prompt enhancement engine. Do NOT output commentary, explanations, or meta-text. Output ONLY a single JSON object.
+  return `You are a prompt enhancer. Your ONLY job is to output an improved version of the user's prompt.
+You do NOT execute code. You do NOT implement anything. You do NOT write functions, components, or files.
+You rewrite the prompt so it produces better results when given to an AI coding agent or assistant.
+If the prompt describes a coding task, enhance the clarity, specificity, and structure of that prompt.
+Do NOT solve the task. Do NOT write the solution. Output only the improved prompt text.
+
+You are a prompt enhancement engine. Do NOT output commentary, explanations, or meta-text. Output ONLY a single JSON object.
 
 STEP 1 — Classify the user's raw prompt into exactly ONE type:
 - CODE: building, fixing, debugging, implementing code or software
@@ -74,6 +82,8 @@ Generate 2-3 specific clarifying questions that would resolve the ambiguity. Tar
 
 STEP 2B — If the prompt is clear (CODE, ANALYSIS, CREATIVE, or STRUCTURED_OUTPUT), enhance it using the framework below, then output EXACTLY this JSON and nothing else:
 {"type":"enhanced","prompt":"the full enhanced prompt text here"}
+
+${codeGuardrail}
 
 ${levelFramework}
 

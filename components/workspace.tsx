@@ -22,13 +22,26 @@ export function Workspace() {
   const [enhancementLevel, setEnhancementLevel] = useState<EnhancementLevel>("smart");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
   // Clarification mode state
   const [clarifyingQuestions, setClarifyingQuestions] = useState<string[] | null>(null);
   const [clarificationAnswers, setClarificationAnswers] = useState<string[]>([]);
   const lastPromptRef = useRef("");
+  const outputTextareaRef = useRef<HTMLTextAreaElement>(null);
 
   const canEnhance = useMemo(() => prompt.trim().length > 0 && !isLoading, [prompt, isLoading]);
+
+  function handleClear() {
+    setPrompt("");
+    setEnhancedPrompt("");
+    setClarifyingQuestions(null);
+    setClarificationAnswers([]);
+    setCopied(false);
+    setIsLoading(false);
+    setError(null);
+    lastPromptRef.current = "";
+  }
 
   async function onEnhance() {
     if (!canEnhance) return;
@@ -139,8 +152,11 @@ export function Workspace() {
   );
 
   async function onCopy() {
-    if (!enhancedPrompt) return;
-    await navigator.clipboard.writeText(enhancedPrompt);
+    const value = outputTextareaRef.current?.value ?? enhancedPrompt;
+    if (!value) return;
+    await navigator.clipboard.writeText(value);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   }
 
   function onDismissClarification() {
@@ -181,16 +197,25 @@ export function Workspace() {
               id="prompt"
               value={prompt}
               onChange={(event) => setPrompt(event.target.value)}
-              readOnly={false}
-              disabled={false}
               placeholder="Describe what you want to build or fix"
-              className="min-h-36 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-sm text-zinc-100 outline-none focus:border-gold/60"
+              className="min-h-36 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-zinc-100 outline-none focus:border-gold/60"
+              style={{ fontSize: "14px", lineHeight: "1.6" }}
             />
           </div>
 
-          <MagicShimmerButton onClick={onEnhance} disabled={!canEnhance}>
-            {isLoading ? "Enhancing..." : "Enhance Prompt"}
-          </MagicShimmerButton>
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={handleClear}
+              disabled={isLoading}
+              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-zinc-700 px-4 text-sm text-zinc-400 hover:text-zinc-200 disabled:opacity-50"
+            >
+              Clear
+            </button>
+            <MagicShimmerButton onClick={onEnhance} disabled={!canEnhance}>
+              {isLoading ? "Enhancing..." : "Enhance Prompt"}
+            </MagicShimmerButton>
+          </div>
 
           {error ? <p className="text-sm text-rose-400">{error}</p> : null}
         </div>
@@ -262,13 +287,15 @@ export function Workspace() {
                   className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-zinc-700 px-4 text-sm text-zinc-300 sm:w-auto"
                 >
                   <Copy className="h-4 w-4" />
-                  Copy
+                  {copied ? "Copied!" : "Copy"}
                 </button>
               </div>
               <textarea
+                ref={outputTextareaRef}
                 value={enhancedPrompt}
                 onChange={(event) => setEnhancedPrompt(event.target.value)}
-                className="overflow-x-auto whitespace-pre-wrap rounded-xl border border-zinc-800 bg-zinc-950 p-4 text-sm leading-relaxed text-zinc-100 outline-none w-full"
+                className="min-h-[200px] w-full whitespace-pre-wrap rounded-xl border border-zinc-800 bg-zinc-950 p-4 text-zinc-100 outline-none"
+                style={{ fontSize: "14px", lineHeight: "1.6" }}
               />
             </AceternityGlowCard>
           </motion.div>
